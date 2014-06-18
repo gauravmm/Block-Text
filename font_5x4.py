@@ -17,7 +17,7 @@ class FONT5x4(AbstractFont):
 
 	def getCharWidth(self, ch):
 		idx = self.getIndex(ch)
-		return GLYPH_WIDTH[idx]
+		return self.GLYPH_WIDTH[idx]
 
 	def getCharHeight(self, ch):
 		return 5
@@ -26,7 +26,7 @@ class FONT5x4(AbstractFont):
 		return 5
 
 	def getCharSpace(self):
-		return self.getChar(" ")
+		return [[False] * self.getMaxCharHeight()]
 
 	def getChar(self, ch):
 		idx = self.getIndex(ch)
@@ -124,7 +124,7 @@ class FONT5x4(AbstractFont):
 ]
 
 		self.GLYPH_WIDTH = [
-  1, 1, 3, 5, 4, 5, 4, 1,
+  2, 1, 3, 5, 4, 5, 4, 1,
   2, 2, 3, 5, 2, 3, 1, 4,
   3, 3, 4, 3, 4, 3, 4, 4,
   4, 4, 1, 2, 3, 3, 3, 4,

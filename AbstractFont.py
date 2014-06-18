@@ -33,6 +33,25 @@ class FontWrapper(object):
 	def getString(self, instr):
 		return [col for ch in instr for col in self.font.getChar(ch)]
 
+class AbstractGlyphMapper(object):
+	def __init__(self):
+		return
+
+	def transform(self, inp):
+		raise Exception("Abstract")
+
+	def mapAcross(self, glyph):
+		return [[self.transform(rel) for rel in col] for col in glyph]
+
+class BasicValueMapper(AbstractGlyphMapper):
+	def __init__(self, valIfTrue, valIfFalse):
+		self.tv = valIfTrue
+		self.fv = valIfFalse
+
+	def transform(self, inp):
+		return self.tv if inp else self.fv
+		
+
 class LayoutWrapper(object):
 	def __init__(self, absFW):
 		self.font = absFW
@@ -64,29 +83,40 @@ class LayoutWrapper(object):
 		return self.font.getMaxCharHeight()
 
 	def get(self):
-		tmpBuffer = []
+		currLineBuffer = []
+		currWordBuffer = []
 		outputLines = []
-		currLineWidth = 0
-		if not self.breakOnWord
+
 		for ch in self.buffer:
 			chrBuffer = self.font.getChar(ch)
 			
-			# If we are eligible to break lines here see if we need to break them:
+			if ch != " ":
+				currWordBuffer.extend(chrBuffer)
+				currWordBuffer.extend(self.font.getCharSpace() * self.charSpacing)
+			
 			if ch == " " or not self.breakOnWord:
-				if currLineWidth + len(chrBuffer) > self.lineWidth:
-					# Break before this character:
-					outputLines.append(tmpBuffer)
-					tmpBuffer = []
-					currLineWidth = 0
+				# Check to see if the word buffer + the line is larger than the max line size:
+				if len(currLineBuffer) + len(currWordBuffer) > self.lineWidth:
+					# Break to new line before this word:
+					outputLines.append(currLineBuffer)
+					currLineBuffer = currWordBuffer
+					currWordBuffer = []
+				else:
+					# Append this word and a trailing space to this line:
+					currLineBuffer.extend(currWordBuffer)
+					currWordBuffer = []
 
-			# Append this character to the end of the line
-			currLineWidth += len(chrBuffer)
-			tmpBuffer.extend(chrBuffer)
-			tmpBuffer.extend(self.font.getCharSpace() * self.charSpacing)
-
+				# If there is space on this line, then add a space:
+				if ch == " ":			
+					if (len(currLineBuffer) + self.font.getCharWidth(" ") + (len(self.font.getCharSpace()) * self.charSpacing)) < self.lineWidth:
+						currLineBuffer.extend(self.font.getChar(" "))
+						currLineBuffer.extend(self.font.getCharSpace() * self.charSpacing)
+		
 		# Flush whatever buffer is remaining:
-		if len(tmpBuffer) > 0:
-			outputLines.append(tmpBuffer)
+		if len(currWordBuffer) > 0:
+			currLineBuffer.extend(currWordBuffer)
+		if len(currLineBuffer) > 0:
+			outputLines.append(currLineBuffer)
 
 		return outputLines
 

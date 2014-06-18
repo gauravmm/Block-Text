@@ -2,7 +2,7 @@
 
 class AbstractRenderer(object):
 	def __init__(self):
-		self.glyphTransform = lambda g: "X" if g else " "
+		self.glyphTransform = lambda g: "M" if g else " "
 
 	def setGlyphTransformation(self, transform):
 		self.glyphTransform = transform
