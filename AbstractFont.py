@@ -82,6 +82,9 @@ class LayoutWrapper(object):
 	def getLineHeight(self):
 		return self.font.getMaxCharHeight()
 
+	def getLineWidth(self):
+		return self.lineWidth
+
 	def get(self):
 		currLineBuffer = []
 		currWordBuffer = []
@@ -119,4 +122,43 @@ class LayoutWrapper(object):
 			outputLines.append(currLineBuffer)
 
 		return outputLines
+
+class ReadOnlyLayoutWrapper(LayoutWrapper):
+	def __init__(self, layoutWrapper, _outputBuffer = None):
+		self.font = layoutWrapper.font
+		self.lineWidth = layoutWrapper.lineWidth
+		self.charSpacing = layoutWrapper.charSpacing
+		self.buffer = None
+		self.breakOnWord = layoutWrapper.breakOnWord
+		if _outputBuffer == None:
+			self.outputBuffer = layoutWrapper.get();
+		else:
+			self.outputBuffer = _outputBuffer;
+
+	def setLineWidth(self, lW):
+		raise Exception("Read-only");
+
+	def setCharSpacing(self, cS):
+		raise Exception("Read-only");
+
+	def setBreakOnWord(self, bOW):
+		raise Exception("Read-only");
+
+	def appendString(self, instr):
+		raise Exception("Read-only");
+
+	def appendLine(self, instr = ""):
+		raise Exception("Read-only");
+
+	def clear(self):
+		raise Exception("Read-only");
+
+	def getLineHeight(self):
+		return self.font.getMaxCharHeight()
+
+	def getLineWidth(self):
+		return self.lineWidth
+
+	def get(self):
+		return self.outputBuffer
 
