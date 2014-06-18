@@ -1,11 +1,16 @@
 #!/usr/bin/python3
+
+from AbstractFont import *
+
 # From: https:#github.com/gauravmm/HT1632-for-Arduino/blob/master/Arduino/HT1632/font_5x4.h
 
 # Characters are defined as boolean arrays, as columns of bools (i.e. left-to-right,
 #  each element is a list of booleans GLYPH_HEIGHT long.
-class FONT:
+class FONT5x4(AbstractFont):
 	def getIndex(self, ch):
 		idx = ord(ch) - 32
+		if idx > 64:
+			idx -= 32
 		if idx < 0 or idx > len(self.GLYPH_WIDTH):
 			raise Exception("Out of bounds char")
 		return idx 
@@ -13,6 +18,15 @@ class FONT:
 	def getCharWidth(self, ch):
 		idx = self.getIndex(ch)
 		return GLYPH_WIDTH[idx]
+
+	def getCharHeight(self, ch):
+		return 5
+
+	def getMaxCharHeight(self):
+		return 5
+
+	def getCharSpace(self):
+		return self.getChar(" ")
 
 	def getChar(self, ch):
 		idx = self.getIndex(ch)
