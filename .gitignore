@@ -4,3 +4,6 @@
 # Python temp:
 __pycache__
 *.pyc
+
+# Test Output:
+test*.html

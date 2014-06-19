@@ -30,15 +30,14 @@ class ShellRenderer(AbstractRenderer):
 
 class SplitRenderer(AbstractRenderer):
     def __init__(self, bufCount, density):
-        super().__init__()
+        super(SplitRenderer).__init__()
         if bufCount <= 0:
             raise Exception("Must have at least one output buffer!")
         self.bufCount = bufCount
         if density <= 0 or density > 1:
             raise Exception("Density must be in range (0..1]")
         self.median = density * (bufCount - 1) + 1
-        self.numTrueInDist = lambda b, m, v: \
-            round(random.triangular(1, b, m)) if v else 0
+        self.numTrueInDist = lambda b, m, v: round(random.triangular(1, b, m)) if v else 0
 
     def setGlyphTransformation(self, transform):
         raise Exception("Cannot set transformation on a non-terminal renderer!")

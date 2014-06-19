@@ -1,2 +1,15 @@
 {
+	"folders":
+    [
+        {
+            "follow_symlinks": true,
+            "path": ".",
+            "folder_exclude_patterns": ["__pycache__"],
+            "file_exclude_patterns": ["*~", "*.sublime-*", ".*"]
+        }
+    ],
+    "settings":
+    {
+    	"python_interpreter": "/usr/bin/python3",
+    }
 }
