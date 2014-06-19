@@ -10,7 +10,7 @@ blockDist = lambda fracMin, fracMax, count: random.randint(math.floor(fracMin * 
 
 fw = LayoutGenerator(FONT5x4())
 #fw.appendString("+")
-fw.appendString("Lorem ipsum dolor sit amet")
+fw.appendString("Lorem ipsum dolor sit amet; This is a test. Let's try this.")
 fw.setLineWidth(100)
 fw.setBreakOnWord(True)
 fw = fw.get()  # Convert to LayoutWrapper
@@ -25,12 +25,14 @@ sR.setDistrib(lambda val, count: 1 if val else 0)
 #shellR = ShellRenderer()
 #shellR.render(scatR.render(fw))
 
-r = HTMLRenderer()
-img = ImageRenderer(1200, 2)
+#r = HTMLRenderer()
 #fw = scatR.render(fw)
 #print(r.wrapTables(r.render(lW) for lW in ([fw] + sR.render(fw))))
 
-#img.render(fw, "test.png")
-
+fw = scatR.render(fw)
 renders = [fw] + sR.render(fw)
-print(r.wrapTables(r.render(scatR.render(lW)) for lW in renders))
+i = 0
+img = ImageRenderer(1600, 2)
+for r in renders:
+	img.render(r, "test_{}.png".format(i))
+	i += 1

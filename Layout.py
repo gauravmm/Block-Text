@@ -45,7 +45,7 @@ class LayoutGenerator(object):
 					outputLines.append(
 						currLineBuffer
 						# Add right-padding:
-						+ ([[False] * self.getLineHeight()] * (self.getLineWidth() - len(currLineBuffer)))
+						+ ([[False] * self.font.getMaxCharHeight()] * (self.lineWidth - len(currLineBuffer)))
 					)
 					currLineBuffer = currWordBuffer
 					currWordBuffer = []
@@ -97,7 +97,7 @@ class LayoutWrapper(AbstractLayoutWrapper):
 		return self.lineHeight
 
 	def getLineWidth(self):
-		return self.lineWidth
+		return len(self.buffer[0])
 
 	def getLineCount(self):
 		return len(self.buffer)

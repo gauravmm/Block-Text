@@ -37,10 +37,14 @@ class ImageRenderer(AbstractRenderer):
 		lines = layoutWrapper.get()
 		blockSz = self.width / layoutWrapper.getLineWidth()
 		height = ((layoutWrapper.getLineCount() - 1)*self.gutter
-					+ layoutWrapper.getLineCount()*layoutWrapper.getLineHeight()) / blockSz
-						
-		surf = C.ImageSurface(C.FORMAT_RGB24, self.width, math.floor(height))
+					+ layoutWrapper.getLineCount()*layoutWrapper.getLineHeight()) * blockSz
+
+		surf = C.ImageSurface(C.FORMAT_ARGB32, self.width, math.floor(height))
 		ctx = C.Context(surf)
+		#ctx.set_source_rgb(1, 1, 1)
+		#ctx.rectangle(0, 0, self.width, height)
+		#ctx.fill()
+		ctx.set_source_rgb(0, 0, 0)
 
 		_y = 0
 		for ln in lines:
