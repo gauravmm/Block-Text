@@ -134,12 +134,9 @@ class LayoutWrapper(object):
 
 
 class ReadOnlyLayoutWrapper(LayoutWrapper):
-	def __init__(self, layoutWrapper, _outputBuffer=None):
-		self.font = layoutWrapper.font
-		self.lineWidth = layoutWrapper.lineWidth
-		self.charSpacing = layoutWrapper.charSpacing
-		self.buffer = None
-		self.breakOnWord = layoutWrapper.breakOnWord
+	def __init__(self, layoutWrapper, _outputBuffer=None, _scaleFactor=1):
+		self.parent = layoutWrapper
+		self.scaleFactor = _scaleFactor
 		if _outputBuffer is None:
 			self.outputBuffer = layoutWrapper.get()
 		else:
@@ -164,10 +161,10 @@ class ReadOnlyLayoutWrapper(LayoutWrapper):
 		raise Exception("Read-only")
 
 	def getLineHeight(self):
-		return self.font.getMaxCharHeight()
+		return self.parent.font.getMaxCharHeight() * self.scaleFactor
 
 	def getLineWidth(self):
-		return self.lineWidth
+		return self.parent.lineWidth * self.scaleFactor
 
 	def get(self):
 		return self.outputBuffer

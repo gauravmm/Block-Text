@@ -6,7 +6,7 @@ from Renderers import AbstractRenderer
 class HTMLRenderer(AbstractRenderer):
     def __init__(self):
         super(HTMLRenderer).__init__()
-        self.cellct = 800
+        self.cellct = 1200
         self.cellsz = "10"
 
     def render(self, layoutWrapper):
