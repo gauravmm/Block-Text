@@ -3,6 +3,8 @@
 
 # Characters are defined as boolean arrays, as columns of bools (i.e. left-to-right,
 #  each element is a list of booleans GLYPH_HEIGHT long, top-to-bottom.
+
+
 class AbstractFont(object):
 	def getCharWidth(self, ch):
 		raise Exception("Abstract")
@@ -19,8 +21,8 @@ class AbstractFont(object):
 	def getCharSpace(self):
 		raise Exception("Abstract")
 
-# Currently not used:
-class FontWrapper(object):
+
+class FontWrapper(object):  # Currently not used
 	def __init__(self, absFont):
 		self.font = absFont
 
@@ -33,6 +35,7 @@ class FontWrapper(object):
 	def getString(self, instr):
 		return [col for ch in instr for col in self.font.getChar(ch)]
 
+
 class AbstractGlyphMapper(object):
 	def __init__(self):
 		return
@@ -43,6 +46,7 @@ class AbstractGlyphMapper(object):
 	def mapAcross(self, glyph):
 		return [[self.transform(rel) for rel in col] for col in glyph]
 
+
 class BasicValueMapper(AbstractGlyphMapper):
 	def __init__(self, valIfTrue, valIfFalse):
 		self.tv = valIfTrue
@@ -50,7 +54,7 @@ class BasicValueMapper(AbstractGlyphMapper):
 
 	def transform(self, inp):
 		return self.tv if inp else self.fv
-		
+
 
 class LayoutWrapper(object):
 	def __init__(self, absFW):
@@ -70,9 +74,9 @@ class LayoutWrapper(object):
 		self.breakOnWord = bOW
 
 	def appendString(self, instr):
-		self.buffer += instr;
+		self.buffer += instr
 
-	def appendLine(self, instr = ""):
+	def appendLine(self, instr=""):
 		self.appendString(instr)
 		self.appendLine()
 
@@ -92,11 +96,11 @@ class LayoutWrapper(object):
 
 		for ch in self.buffer:
 			chrBuffer = self.font.getChar(ch)
-			
+
 			if ch != " ":
 				currWordBuffer.extend(chrBuffer)
 				currWordBuffer.extend(self.font.getCharSpace() * self.charSpacing)
-			
+
 			if ch == " " or not self.breakOnWord:
 				# Check to see if the word buffer + the line is larger than the max line size:
 				if len(currLineBuffer) + len(currWordBuffer) > self.lineWidth:
@@ -110,11 +114,12 @@ class LayoutWrapper(object):
 					currWordBuffer = []
 
 				# If there is space on this line, then add a space:
-				if ch == " ":			
-					if (len(currLineBuffer) + self.font.getCharWidth(" ") + (len(self.font.getCharSpace()) * self.charSpacing)) < self.lineWidth:
+				if ch == " ":
+					if len(currLineBuffer) + self.font.getCharWidth(" ") \
+						+ (len(self.font.getCharSpace()) * self.charSpacing) < self.lineWidth:
 						currLineBuffer.extend(self.font.getChar(" "))
 						currLineBuffer.extend(self.font.getCharSpace() * self.charSpacing)
-		
+
 		# Flush whatever buffer is remaining:
 		if len(currWordBuffer) > 0:
 			currLineBuffer.extend(currWordBuffer)
@@ -123,35 +128,36 @@ class LayoutWrapper(object):
 
 		return outputLines
 
+
 class ReadOnlyLayoutWrapper(LayoutWrapper):
-	def __init__(self, layoutWrapper, _outputBuffer = None):
+	def __init__(self, layoutWrapper, _outputBuffer=None):
 		self.font = layoutWrapper.font
 		self.lineWidth = layoutWrapper.lineWidth
 		self.charSpacing = layoutWrapper.charSpacing
 		self.buffer = None
 		self.breakOnWord = layoutWrapper.breakOnWord
-		if _outputBuffer == None:
-			self.outputBuffer = layoutWrapper.get();
+		if _outputBuffer is None:
+			self.outputBuffer = layoutWrapper.get()
 		else:
-			self.outputBuffer = _outputBuffer;
+			self.outputBuffer = _outputBuffer
 
 	def setLineWidth(self, lW):
-		raise Exception("Read-only");
+		raise Exception("Read-only")
 
 	def setCharSpacing(self, cS):
-		raise Exception("Read-only");
+		raise Exception("Read-only")
 
 	def setBreakOnWord(self, bOW):
-		raise Exception("Read-only");
+		raise Exception("Read-only")
 
 	def appendString(self, instr):
-		raise Exception("Read-only");
+		raise Exception("Read-only")
 
-	def appendLine(self, instr = ""):
-		raise Exception("Read-only");
+	def appendLine(self, instr=""):
+		raise Exception("Read-only")
 
 	def clear(self):
-		raise Exception("Read-only");
+		raise Exception("Read-only")
 
 	def getLineHeight(self):
 		return self.font.getMaxCharHeight()
@@ -161,4 +167,3 @@ class ReadOnlyLayoutWrapper(LayoutWrapper):
 
 	def get(self):
 		return self.outputBuffer
-
