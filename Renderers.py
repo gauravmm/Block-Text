@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
-import random
+import random, math
+import cairo as C
 from AbstractFont import ReadOnlyLayoutWrapper
 random.seed()
 
@@ -27,6 +28,33 @@ class ShellRenderer(AbstractRenderer):
 	def setGlyphTransformation(self, transform):
 		self.glyphTransform = transform
 
+class ImageRenderer(AbstractRenderer):
+	def __init__(self, width, gutter):
+		self.width = width
+		self.gutter = gutter
+
+	def render(self, layoutWrapper, filename="out.png"):
+		lines = layoutWrapper.get()
+		blockSz = self.width / layoutWrapper.getLineWidth()
+		height = ((layoutWrapper.getLineCount() - 1)*self.gutter
+					+ layoutWrapper.getLineCount()*layoutWrapper.getLineHeight()) / blockSz
+						
+		surf = C.ImageSurface(C.FORMAT_RGB24, self.width, math.floor(height))
+		ctx = C.Context(surf)
+
+		_y = 0
+		for ln in lines:
+			for r in range(0, layoutWrapper.getLineHeight()):
+				_x = 0
+				for col in ln:
+					if col[r]:
+						ctx.rectangle(_x, _y, blockSz, blockSz)
+						ctx.fill()
+					_x += blockSz
+				_y += blockSz  # Advance one row down.
+			_y += blockSz * self.gutter  # The gutter
+
+		surf.write_to_png(filename)
 
 
 class DistributionGeneratorRenderer(AbstractRenderer):

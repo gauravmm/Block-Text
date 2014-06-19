@@ -89,6 +89,12 @@ class LayoutWrapper(object):
 	def getLineWidth(self):
 		return self.lineWidth
 
+	def getLineCount(self):
+		raise Exception("We don't know that yet.")
+
+	def getFont(self):
+		return self.font
+
 	def get(self):
 		currLineBuffer = []
 		currWordBuffer = []
@@ -161,10 +167,16 @@ class ReadOnlyLayoutWrapper(LayoutWrapper):
 		raise Exception("Read-only")
 
 	def getLineHeight(self):
-		return self.parent.font.getMaxCharHeight() * self.scaleFactor
+		return self.parent.getLineHeight() * self.scaleFactor
 
 	def getLineWidth(self):
-		return self.parent.lineWidth * self.scaleFactor
+		return self.parent.getLineWidth() * self.scaleFactor
+
+	def getLineCount(self):
+		return len(self.outputBuffer)
+
+	def getFont(self):
+		return self.parent.getFont()
 
 	def get(self):
 		return self.outputBuffer
