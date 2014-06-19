@@ -105,7 +105,11 @@ class LayoutWrapper(object):
 				# Check to see if the word buffer + the line is larger than the max line size:
 				if len(currLineBuffer) + len(currWordBuffer) > self.lineWidth:
 					# Break to new line before this word:
-					outputLines.append(currLineBuffer)
+					outputLines.append(
+						currLineBuffer
+						# Add right-padding:
+						+ ([[False] * self.getLineHeight()] * (self.getLineWidth() - len(currLineBuffer)))
+					)
 					currLineBuffer = currWordBuffer
 					currWordBuffer = []
 				else:
