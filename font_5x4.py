@@ -22,10 +22,10 @@ class FONT5x4(AbstractFont):
 		return self.GLYPH_WIDTH[idx]
 
 	def getCharHeight(self, ch):
-		return 5
+		return self.GLYPH_HEIGHT
 
 	def getMaxCharHeight(self):
-		return 5
+		return self.GLYPH_HEIGHT
 
 	def getCharSpace(self):
 		return [[False] * self.getMaxCharHeight()]
@@ -48,7 +48,7 @@ class FONT5x4(AbstractFont):
 		return rv
 
 	def __init__(self):
-		self.GLYPH_HEIGHT = 5
+		self.GLYPH_HEIGHT = 6
 		self.GLYPH_STEP = 10  # Number of bytes per glyph
 
 		self.DATA = [

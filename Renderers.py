@@ -106,6 +106,7 @@ class SplitRenderer(AbstractRenderer):
 	def setDistrib(self, func):
 		self.distGen.setDistrib(func)
 
+
 class ScatterRenderer(AbstractRenderer):
 	def __init__(self, scatterSize):
 		super(ScatterRenderer).__init__()
@@ -132,3 +133,24 @@ class ScatterRenderer(AbstractRenderer):
 
 	def setDistrib(self, func):
 		self.distGen.setDistrib(func)
+
+
+class NoiseRenderer(AbstractRenderer):
+	def __init__(self, noiseProbability=lambda v: 0 if v else 0.1):
+		self.nP = noiseProbability
+
+	def render(self, layoutWrapper):
+		lines = layoutWrapper.get()
+		return ReadOnlyLayoutWrapper(layoutWrapper,
+				[[[ (random.random() < self.nP(r))
+					 for r in col] for col in ln] for ln in lines])
+
+class CompositeRenderer(AbstractRenderer):
+	def render(self, layoutWrapperA, layoutWrapperB, compositeFunc):
+		linesA = layoutWrapperA.get()
+		linesB = layoutWrapperB.get()
+		return ReadOnlyLayoutWrapper(layoutWrapperA,
+				[[[ compositeFunc(linesA[lnI][colI][rI], linesB[lnI][colI][rI])
+					 for rI in range(len(linesA[lnI][colI]))]
+					 	for colI in range(len(linesA[lnI]))]
+					 		for lnI in range(len(linesA))])

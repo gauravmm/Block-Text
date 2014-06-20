@@ -15,12 +15,21 @@ fw.setLineWidth(100)
 fw.setBreakOnWord(True)
 fw = fw.get()  # Convert to LayoutWrapper
 
-scatR = ScatterRenderer(4)
-scatR.setDistrib(lambda val, count: blockDist(0.8, 1.0, count) if val else blockDist(0.0, 0.2, count))
-#scatR.setDistrib(lambda val, count: 0 if val else count)
+scatR = ScatterRenderer(5)
+scatR.setDistrib(lambda val, count: count if val else 0)
+#scatR.setDistrib(lambda val, count: blockDist(0.8, 1.0, count) if val else blockDist(0.0, 0.2, count))
+fw = scatR.render(fw)
 
+# Generate 10% noise in the white areas:
+noiseR = NoiseRenderer(lambda v: 0 if v else 0.2)
+fwNoise = noiseR.render(fw)
+
+# Split such that each output image gets exactly 1/2 of the total.
 sR = SplitRenderer(2)
 sR.setDistrib(lambda val, count: 1 if val else 0)
+
+compositeR = CompositeRenderer()
+
 
 #shellR = ShellRenderer()
 #shellR.render(scatR.render(fw))
@@ -29,10 +38,9 @@ sR.setDistrib(lambda val, count: 1 if val else 0)
 #fw = scatR.render(fw)
 #print(r.wrapTables(r.render(lW) for lW in ([fw] + sR.render(fw))))
 
-fw = scatR.render(fw)
-renders = [fw] + sR.render(fw)
+renders = [fwNoise, fw] + [compositeR.render(partW, fwNoise, lambda a, b: a or b) for partW in [fw] + sR.render(fw)]
 i = 0
-img = ImageRenderer(1600, 2)
+img = ImageRenderer(1600, 0)
 for r in renders:
 	img.render(r, "test_{}.png".format(i))
 	i += 1
