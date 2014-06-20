@@ -32,10 +32,17 @@ class LayoutGenerator(object):
 		outputLines = []
 
 		for ch in self.buffer:
-			if ch != " ":
+			if ch not in [" ", "\n"]:
 				chrBuffer = self.font.getChar(ch)
 				currWordBuffer.extend(chrBuffer)
 				currWordBuffer.extend(self.font.getCharSpace() * self.charSpacing)
+
+			if ch == "\n":
+				# Append this word to the lineBuffer and then move to the next line
+				currLineBuffer.extend(currWordBuffer)
+				outputLines.append(self.padRight(currLineBuffer))
+				currLineBuffer = []
+				currWordBuffer = []
 
 			if ch == " " or not self.breakOnWord:
 				# Check to see if the word buffer + the line is larger than the max line size:

@@ -6,16 +6,19 @@ from HTMLRenderer import *
 from font_5x4 import FONT5x4
 import random, math
 
+lineWidth = 200
+scatterFactor = 4
+
 blockDist = lambda fracMin, fracMax, count: random.randint(math.floor(fracMin * count), math.ceil(fracMax * count))
 
 fw = LayoutGenerator(FONT5x4())
 #fw.appendString("+")
-fw.appendString("Lorem ipsum dolor\nsit amet; This is a test. Let's try this.")
-fw.setLineWidth(100)
+fw.appendString("Lorem ipsum dolor\nsit amet; This is a  large  test. Let's try this.")
+fw.setLineWidth(lineWidth)
 fw.setBreakOnWord(True)
 fw = fw.get()  # Convert to LayoutWrapper
 
-scatR = ScatterRenderer(5)
+scatR = ScatterRenderer(scatterFactor)
 scatR.setDistrib(lambda val, count: count if val else 0)
 #scatR.setDistrib(lambda val, count: blockDist(0.8, 1.0, count) if val else blockDist(0.0, 0.2, count))
 fw = scatR.render(fw)
@@ -40,7 +43,7 @@ compositeR = CompositeRenderer()
 
 renders = [fwNoise, fw] + [compositeR.render(partW, fwNoise, lambda a, b: a or b) for partW in [fw] + sR.render(fw)]
 i = 0
-img = ImageRenderer(2000, 0)
+img = ImageRenderer(lineWidth * scatterFactor * 5, 0)
 for r in renders:
 	img.render(r, "test_{}.png".format(i))
 	i += 1
