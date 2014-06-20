@@ -10,7 +10,7 @@ blockDist = lambda fracMin, fracMax, count: random.randint(math.floor(fracMin * 
 
 fw = LayoutGenerator(FONT5x4())
 #fw.appendString("+")
-fw.appendString("Lorem ipsum dolor sit amet; This is a test. Let's try this.")
+fw.appendString("Lorem ipsum dolor\nsit amet; This is a test. Let's try this.")
 fw.setLineWidth(100)
 fw.setBreakOnWord(True)
 fw = fw.get()  # Convert to LayoutWrapper
@@ -40,7 +40,7 @@ compositeR = CompositeRenderer()
 
 renders = [fwNoise, fw] + [compositeR.render(partW, fwNoise, lambda a, b: a or b) for partW in [fw] + sR.render(fw)]
 i = 0
-img = ImageRenderer(1600, 0)
+img = ImageRenderer(2000, 0)
 for r in renders:
 	img.render(r, "test_{}.png".format(i))
 	i += 1

@@ -32,9 +32,8 @@ class LayoutGenerator(object):
 		outputLines = []
 
 		for ch in self.buffer:
-			chrBuffer = self.font.getChar(ch)
-
 			if ch != " ":
+				chrBuffer = self.font.getChar(ch)
 				currWordBuffer.extend(chrBuffer)
 				currWordBuffer.extend(self.font.getCharSpace() * self.charSpacing)
 
@@ -42,11 +41,7 @@ class LayoutGenerator(object):
 				# Check to see if the word buffer + the line is larger than the max line size:
 				if len(currLineBuffer) + len(currWordBuffer) > self.lineWidth:
 					# Break to new line before this word:
-					outputLines.append(
-						currLineBuffer
-						# Add right-padding:
-						+ ([[False] * self.font.getMaxCharHeight()] * (self.lineWidth - len(currLineBuffer)))
-					)
+					outputLines.append(self.padRight(currLineBuffer))
 					currLineBuffer = currWordBuffer
 					currWordBuffer = []
 				else:
@@ -65,9 +60,13 @@ class LayoutGenerator(object):
 		if len(currWordBuffer) > 0:
 			currLineBuffer.extend(currWordBuffer)
 		if len(currLineBuffer) > 0:
-			outputLines.append(currLineBuffer)
+			outputLines.append(self.padRight(currLineBuffer))
 
 		return LayoutWrapper(self.font, self.lineWidth, outputLines)
+
+	def padRight(self, lineBuffer):
+			return lineBuffer + ([[False] * self.font.getMaxCharHeight()] * (self.lineWidth - len(lineBuffer)))
+
 
 
 class AbstractLayoutWrapper(object):

@@ -52,7 +52,7 @@ class ImageRenderer(AbstractRenderer):
 				_x = 0
 				for col in ln:
 					if col[r]:
-						ctx.rectangle(_x, _y, blockSz, blockSz)
+						ctx.rectangle(round(_x), round(_y), round(blockSz), round(blockSz))
 						ctx.fill()
 					_x += blockSz
 				_y += blockSz  # Advance one row down.
