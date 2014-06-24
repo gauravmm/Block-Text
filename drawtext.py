@@ -19,8 +19,7 @@ fw.setBreakOnWord(True)
 fw = fw.get()  # Convert to LayoutWrapper
 
 scatR = ScatterRenderer(scatterFactor)
-scatR.setDistrib(lambda val, count: count if val else 0)
-#scatR.setDistrib(lambda val, count: blockDist(0.8, 1.0, count) if val else blockDist(0.0, 0.2, count))
+scatR.setDistrib(lambda val, count, line, col, row: count if val else 0)
 fw = scatR.render(fw)
 
 # Generate 10% noise in the white areas:
@@ -29,10 +28,9 @@ fwNoise = noiseR.render(fw)
 
 # Split such that each output image gets exactly 1/2 of the total.
 sR = SplitRenderer(2)
-sR.setDistrib(lambda val, count: 1 if val else 0)
+sR.setDistrib(lambda val, count, line, col, row: (count if line == 0 else 1) if val else 0)
 
 compositeR = CompositeRenderer()
-
 
 #shellR = ShellRenderer()
 #shellR.render(scatR.render(fw))

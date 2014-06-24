@@ -71,16 +71,16 @@ class DistributionGeneratorRenderer(AbstractRenderer):
 
 	def render(self, layoutWrapper):
 		lines = layoutWrapper.get()
-		# Transpose outBufs is now [lines][columns][cells][buffer_number]
+		#outBufs is now [lines][columns][cells][buffer_number]
 		return ReadOnlyLayoutWrapper(layoutWrapper,
-				[[[self.generateDist(r)
-					 for r in col] for col in ln] for ln in lines])
+				[[[self.generateDist(lines[ln][col][r], ln, col, r)
+					 for r in range(len(lines[ln][col]))] for col in range(len(lines[ln]))] for ln in range(len(lines))])
 
 	def setDistrib(self, func):
 		self.distrib = func
 
-	def generateDist(self, val):
-		numTrue = self.distrib(val, self.bufCount)
+	def generateDist(self, val, ln, col, r):
+		numTrue = self.distrib(val, self.bufCount, ln, col, r)
 		rv = [True] * numTrue + [False] * (self.bufCount - numTrue)
 		random.shuffle(rv)
 		return rv
@@ -133,6 +133,10 @@ class ScatterRenderer(AbstractRenderer):
 
 	def setDistrib(self, func):
 		self.distGen.setDistrib(func)
+
+	def setDistribExtended(self, func):
+		self.distGen.setDistrib(func)
+
 
 
 class NoiseRenderer(AbstractRenderer):
