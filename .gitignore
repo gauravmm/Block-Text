@@ -1,5 +1,5 @@
 # Sublime:
-.sublime-workspace
+*.sublime-workspace
 
 # gedit temp:
 *~
