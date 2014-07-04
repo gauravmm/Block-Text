@@ -7,13 +7,14 @@ from font_5x4 import FONT5x4
 import random, math
 
 lineWidth = 200
-scatterFactor = 4
+scatterFactor = 5
 
 blockDist = lambda fracMin, fracMax, count: random.randint(math.floor(fracMin * count), math.ceil(fracMax * count))
 
 fw = LayoutGenerator(FONT5x4())
-#fw.appendString("+")
-fw.appendString("Lorem ipsum dolor\nsit amet; This is a  large  test. Let's try this.")
+with open('message.txt', 'r') as content_file:
+	content = "\n".join(content_file.readlines())
+	fw.appendString(content)
 fw.setLineWidth(lineWidth)
 fw.setBreakOnWord(True)
 fw = fw.get()  # Convert to LayoutWrapper

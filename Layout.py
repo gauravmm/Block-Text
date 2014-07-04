@@ -43,6 +43,8 @@ class LayoutGenerator(object):
 				outputLines.append(self.padRight(currLineBuffer))
 				currLineBuffer = []
 				currWordBuffer = []
+				#currLineBuffer.extend(self.font.getChar("\\"))
+				#currLineBuffer.extend(self.font.getChar("n"))
 
 			if ch == " " or not self.breakOnWord:
 				# Check to see if the word buffer + the line is larger than the max line size:
@@ -52,11 +54,11 @@ class LayoutGenerator(object):
 					currLineBuffer = currWordBuffer
 					currWordBuffer = []
 				else:
-					# Append this word and a trailing space to this line:
+					# Append this word to this line:
 					currLineBuffer.extend(currWordBuffer)
 					currWordBuffer = []
 
-				# If there is space on this line, then add a space:
+				# If there is space on this line, then add a traiing space:
 				if ch == " ":
 					if len(currLineBuffer) + self.font.getCharWidth(" ") \
 						+ (len(self.font.getCharSpace()) * self.charSpacing) < self.lineWidth:
