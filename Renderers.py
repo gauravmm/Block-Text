@@ -5,12 +5,12 @@ try:
     import cairo as C
 except ImportError:
     C = None
-from Layout import ReadOnlyLayoutWrapper
+from Layout import ReadOnlyBlockImage
 random.seed()
 
 
 class AbstractRenderer(object):
-	def render(self, layoutWrapper):
+	def render(self, blockImage):
 		raise Exception("Abstract")
 
 
@@ -18,14 +18,14 @@ class ShellOutputRenderer(AbstractRenderer):
 	def __init__(self):
 		self.glyphTransform = lambda g: "#" if g else " "
 
-	def render(self, layoutWrapper):
-		lines = layoutWrapper.get()
+	def render(self, blockImage):
+		lines = blockImage.get()
 		for ln in lines:
-			for r in range(0, layoutWrapper.getLineHeight()):
+			for r in range(0, blockImage.getLineHeight()):
 				print("".join(self.glyphTransform(col[r]) for col in ln))
 			print()
 			print("".join(self.glyphTransform(c) for c in
-				  [True, False] * (layoutWrapper.getLineWidth() // 2)))
+				  [True, False] * (blockImage.getLineWidth() // 2)))
 			print()
 
 	def setGlyphTransformation(self, transform):
@@ -38,11 +38,11 @@ class ImageOutputRenderer(AbstractRenderer):
 		self.width = width
 		self.gutter = gutter
 
-	def render(self, layoutWrapper, filename="out.png"):
-		lines = layoutWrapper.get()
-		blockSz = self.width / layoutWrapper.getLineWidth()
-		height = ((layoutWrapper.getLineCount() - 1)*self.gutter
-					+ layoutWrapper.getLineCount()*layoutWrapper.getLineHeight()) * blockSz
+	def render(self, blockImage, filename="out.png"):
+		lines = blockImage.get()
+		blockSz = self.width / blockImage.getLineWidth()
+		height = ((blockImage.getLineCount() - 1)*self.gutter
+					+ blockImage.getLineCount()*blockImage.getLineHeight()) * blockSz
 
 		surf = C.ImageSurface(C.FORMAT_ARGB32, self.width, math.floor(height))
 		ctx = C.Context(surf)
@@ -53,7 +53,7 @@ class ImageOutputRenderer(AbstractRenderer):
 
 		_y = 0
 		for ln in lines:
-			for r in range(0, layoutWrapper.getLineHeight()):
+			for r in range(0, blockImage.getLineHeight()):
 				_x = 0
 				for col in ln:
 					if col[r]:
@@ -74,10 +74,10 @@ class DistributionGeneratorRenderer(AbstractRenderer):
 		self.bufCount = bufCount
 		self.distrib = lambda v, c: c if v else 0
 
-	def render(self, layoutWrapper):
-		lines = layoutWrapper.get()
+	def render(self, blockImage):
+		lines = blockImage.get()
 		#outBufs is now [lines][columns][cells][buffer_number]
-		return ReadOnlyLayoutWrapper(layoutWrapper,
+		return ReadOnlyBlockImage(blockImage,
 				[[[self.generateDist(lines[ln][col][r], ln, col, r)
 					 for r in range(len(lines[ln][col]))] for col in range(len(lines[ln]))] for ln in range(len(lines))])
 
@@ -97,12 +97,12 @@ class SplitRenderer(AbstractRenderer):
 		self.distGen = DistributionGeneratorRenderer(bufCount)
 		self.bufCount = bufCount
 		
-	def render(self, layoutWrapper):
-		dist = self.distGen.render(layoutWrapper)
+	def render(self, blockImage):
+		dist = self.distGen.render(blockImage)
 		outBufs = dist.get()
 		# Transpose outBufs from [lines][columns][cells][buffer_number]
 		#  to [buffer_number][lines][columns][cells]:
-		return [ReadOnlyLayoutWrapper(layoutWrapper,
+		return [ReadOnlyBlockImage(blockImage,
 				[[[r[bidx] for r in col]
 				  for col in ln]
 				 for ln in outBufs])
@@ -118,8 +118,8 @@ class MapScaleRenderer(AbstractRenderer):
 		self.distGen = DistributionGeneratorRenderer(scatterSize ** 2)
 		self.scatterSize = scatterSize
 		
-	def render(self, layoutWrapper):
-		dist = self.distGen.render(layoutWrapper)
+	def render(self, blockImage):
+		dist = self.distGen.render(blockImage)
 		outBufs = dist.get()
 		# outBufs is [lines][columns][cells][buffer_number]
 		sS = self.scatterSize
@@ -134,7 +134,7 @@ class MapScaleRenderer(AbstractRenderer):
 						 for col in ln for bidx in range(sS)]
 								for ln in outBufs]
 
-		return ReadOnlyLayoutWrapper(layoutWrapper, outBufs, sS)
+		return ReadOnlyBlockImage(blockImage, outBufs, sS)
 
 	def setDistrib(self, func):
 		self.distGen.setDistrib(func)
@@ -148,17 +148,17 @@ class NoiseRenderer(AbstractRenderer):
 	def __init__(self, noiseProbability=lambda v: 0 if v else 0.1):
 		self.nP = noiseProbability
 
-	def render(self, layoutWrapper):
-		lines = layoutWrapper.get()
-		return ReadOnlyLayoutWrapper(layoutWrapper,
+	def render(self, blockImage):
+		lines = blockImage.get()
+		return ReadOnlyBlockImage(blockImage,
 				[[[ (random.random() < self.nP(r))
 					 for r in col] for col in ln] for ln in lines])
 
 class ZipRenderer(AbstractRenderer):
-	def render(self, layoutWrapperA, layoutWrapperB, compositeFunc):
-		linesA = layoutWrapperA.get()
-		linesB = layoutWrapperB.get()
-		return ReadOnlyLayoutWrapper(layoutWrapperA,
+	def render(self, blockImageA, blockImageB, compositeFunc):
+		linesA = blockImageA.get()
+		linesB = blockImageB.get()
+		return ReadOnlyBlockImage(blockImageA,
 				[[[ compositeFunc(linesA[lnI][colI][rI], linesB[lnI][colI][rI])
 					 for rI in range(len(linesA[lnI][colI]))]
 					 	for colI in range(len(linesA[lnI]))]

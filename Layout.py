@@ -71,14 +71,14 @@ class LayoutGenerator(object):
 		if len(currLineBuffer) > 0:
 			outputLines.append(self.padRight(currLineBuffer))
 
-		return LayoutWrapper(self.font, self.lineWidth, outputLines)
+		return BlockImage(self.font, self.lineWidth, outputLines)
 
 	def padRight(self, lineBuffer):
 			return lineBuffer + ([[False] * self.font.getMaxCharHeight()] * (self.lineWidth - len(lineBuffer)))
 
 
 
-class AbstractLayoutWrapper(object):
+class AbstractBlockImage(object):
 	def getLineHeight(self):
 		raise Exception("Abstract")
 
@@ -95,7 +95,7 @@ class AbstractLayoutWrapper(object):
 		raise Exception("Abstract")
 
 
-class LayoutWrapper(AbstractLayoutWrapper):
+class BlockImage(AbstractBlockImage):
 	def __init__(self, font, lineWidth, buffer):
 		self.lineHeight = font.getMaxCharHeight()
 		self.lineWidth = lineWidth
@@ -114,7 +114,7 @@ class LayoutWrapper(AbstractLayoutWrapper):
 		return self.buffer
 
 
-class ReadOnlyLayoutWrapper(AbstractLayoutWrapper):
+class ReadOnlyBlockImage(AbstractBlockImage):
 	def __init__(self, layoutWrapper, _outputBuffer, _scaleFactor=1):
 		self.parent = layoutWrapper
 		self.scaleFactor = _scaleFactor

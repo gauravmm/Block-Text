@@ -9,12 +9,12 @@ class HTMLRenderer(AbstractRenderer):
         self.cellct = 1200
         self.cellsz = "10"
 
-    def render(self, layoutWrapper):
-        lines = layoutWrapper.get()
+    def render(self, blockImage):
+        lines = blockImage.get()
         table = []
         for ln in lines:
             self.cellsz = str(self.cellct // len(ln))
-            table.extend(self.mkRow(self.mkCell(col[r]) for col in ln) for r in range(layoutWrapper.getLineHeight()))
+            table.extend(self.mkRow(self.mkCell(col[r]) for col in ln) for r in range(blockImage.getLineHeight()))
             # Add the gap between lines:
             table.append(self.mkRow(self.mkCell(False) for col in ln))
 
