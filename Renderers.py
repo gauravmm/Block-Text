@@ -72,7 +72,7 @@ class DistributionGeneratorRenderer(AbstractRenderer):
 		if bufCount <= 0:
 			raise Exception("Must have at least one dimension in the distribution!")
 		self.bufCount = bufCount
-		self.distrib = lambda v, c: c if v else 0
+		self.distrib = lambda val, count, line, col, row: count if val else 0
 
 	def render(self, blockImage):
 		lines = blockImage.get()

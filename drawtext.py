@@ -2,7 +2,7 @@
 from AbstractFont import *
 from Layout import *
 from Renderers import *
-from HTMLRenderer import *
+from HTMLOutputRenderer import *
 from font_5x4 import FONT5x4
 import sys, argparse
 
@@ -30,14 +30,10 @@ def main():
 						help='set the width of the output in blocks (default: set by output type)')
 	parser.add_argument("-t", "--type", metavar="T", type=str, default=LEGAL_TYPES[0],
 						help='output as ' + ", ".join(LEGAL_TYPES) + ' (default: ' + LEGAL_TYPES[0] + '). PNG requires PyCairo.')
-	parser.add_argument("-o", "--output", metavar="FILE", type=str, default="",
-						help='direct the output to this file (default: to stdout)')
 	parser.add_argument("-v", "--verbose", action="store_true",
 						help='output additional images')
 	
-	
 	args = parser.parse_args()
-	print(args)
 
 	# Bounds checking:
 	boundsCheck(args.scale, "scale", 1)
@@ -63,14 +59,11 @@ def main():
 	if content == "":
 		print("There's nothing to render!")
 		exit()
-
-	# type='TXT'
-	# output=''
 	
 	lineWidth = 200
 	if args.width > 0:
 		lineWidth = args.width
-	elif args.output == "" and args.type == "TXT":
+	elif args.type == "TXT":
 		lineWidth = 80
 
 	scaleFactor = args.scale
@@ -95,31 +88,37 @@ def main():
 	sR = SplitRenderer(args.split)
 	if args.first_line:
 		sR.setDistrib(lambda val, count, line, col, row: (count if line == 0 else 1) if val else 0)
-
-	compositeR = CompositeRenderer()
-
-	#shellR = ShellRenderer()
-	#shellR.render(scatR.render(fw))
-
-	#r = HTMLRenderer()
-	#fw = scatR.render(fw)
-	#print(r.wrapTables(r.render(lW) for lW in ([fw] + sR.render(fw))))
-
 	toComposite = sR.render(fw)
+
+	# Add more images to the compositing flow, if verbose:
 	if args.verbose:
 		toComposite.append(fw)
-
+	compositeR = ZipRenderer()
 	renders = [compositeR.render(partW, fwNoise, lambda a, b: a or b) for partW in toComposite]
 	del toComposite
 
+	# Add more images to the output flow, if verbose
 	if args.verbose:
 		renders.extend([fwNoise, fw])
 
-	i = 0
-	img = ImageRenderer(lineWidth * scaleFactor * 5, 0)
-	for r in renders:
-		img.render(r, "test_{}.png".format(i))
-		i += 1
+	# Output as appropriate:
+	if args.type == "TXT":
+		r = ShellOutputRenderer()
+		for img in renders:
+			print(r.render(img))
+			print()
+	elif args.type == "HTML":
+		r = HTMLOutputRenderer()
+		print(r.wrapTables(r.render(lW) for lW in renders))
+	elif args.type == "PNG":
+		i = 0
+		img = ImageOutputRenderer(lineWidth * scaleFactor * 5, 0)
+		for r in renders:
+			img.render(r, "blocktext_{}.png".format(i))
+			i += 1
+	else:
+		print("Unrecognized output type: {}".format(args.type))
+		exit()
 
 def boundsCheck(val, _name, _min, _max=None):
 	if val < _min:

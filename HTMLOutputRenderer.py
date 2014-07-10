@@ -3,9 +3,9 @@
 from Renderers import AbstractRenderer
 
 
-class HTMLRenderer(AbstractRenderer):
+class HTMLOutputRenderer(AbstractRenderer):
     def __init__(self):
-        super(HTMLRenderer).__init__()
+        super(HTMLOutputRenderer).__init__()
         self.cellct = 1200
         self.cellsz = "10"
 
