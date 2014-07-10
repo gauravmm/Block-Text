@@ -1,7 +1,10 @@
 #!/usr/bin/python3
 
 import random, math
-import cairo as C
+try:
+    import cairo as C
+except ImportError:
+    C = None
 from Layout import ReadOnlyLayoutWrapper
 random.seed()
 
@@ -11,7 +14,7 @@ class AbstractRenderer(object):
 		raise Exception("Abstract")
 
 
-class ShellRenderer(AbstractRenderer):
+class ShellOutputRenderer(AbstractRenderer):
 	def __init__(self):
 		self.glyphTransform = lambda g: "#" if g else " "
 
@@ -28,8 +31,10 @@ class ShellRenderer(AbstractRenderer):
 	def setGlyphTransformation(self, transform):
 		self.glyphTransform = transform
 
-class ImageRenderer(AbstractRenderer):
+class ImageOutputRenderer(AbstractRenderer):
 	def __init__(self, width, gutter):
+		if C is None:
+			raise Exception("PyCairo is not installed!")
 		self.width = width
 		self.gutter = gutter
 
@@ -107,9 +112,9 @@ class SplitRenderer(AbstractRenderer):
 		self.distGen.setDistrib(func)
 
 
-class ScatterRenderer(AbstractRenderer):
+class MapScaleRenderer(AbstractRenderer):
 	def __init__(self, scatterSize):
-		super(ScatterRenderer).__init__()
+		super(MapScaleRenderer).__init__()
 		self.distGen = DistributionGeneratorRenderer(scatterSize ** 2)
 		self.scatterSize = scatterSize
 		
@@ -149,7 +154,7 @@ class NoiseRenderer(AbstractRenderer):
 				[[[ (random.random() < self.nP(r))
 					 for r in col] for col in ln] for ln in lines])
 
-class CompositeRenderer(AbstractRenderer):
+class ZipRenderer(AbstractRenderer):
 	def render(self, layoutWrapperA, layoutWrapperB, compositeFunc):
 		linesA = layoutWrapperA.get()
 		linesB = layoutWrapperB.get()
