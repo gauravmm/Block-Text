@@ -16,12 +16,12 @@ def main():
 						help="an ASCII/UTF-7 encoded text file to render. If not specified, defaults to STDIN.")
 	parser.add_argument("-s", "--split", metavar="S", type=int, default=2,
 						help='set the number of images to split the image into (default: 2)')
-	parser.add_argument("-z", "--scale", metavar="S", type=int, default=1,
-						help='set the size of each block in the block font (default: 1)')
+	parser.add_argument("-z", "--scale", metavar="S", type=int, default=5,
+						help='set the size of each block in the block font (default: 5)')
 	parser.add_argument("-n", "--noise", metavar="N", type=float, default=0.2,
 						help='set the amount of noise in the white part of the image (default: 0.2)')
-	parser.add_argument("-d", "--density", metavar="D", type=float, default=1,
-						help='set the shaded proportion of the black part of the image (default: 1)')
+	#parser.add_argument("-d", "--density", metavar="D", type=float, default=1,
+	#					help='set the shaded proportion of the black part of the image (default: 1)')
 	parser.add_argument("--break-on-char", action="store_true",
 						help='break lines on character boundaries (default: words are not broken across lines)')
 	parser.add_argument("-f", "--first-line", action="store_true",
@@ -32,6 +32,9 @@ def main():
 						help='output as ' + ", ".join(LEGAL_TYPES) + ' (default: ' + LEGAL_TYPES[0] + '). PNG requires PyCairo.')
 	parser.add_argument("-o", "--output", metavar="FILE", type=str, default="",
 						help='direct the output to this file (default: to stdout)')
+	parser.add_argument("-v", "--verbose", action="store_true",
+						help='output additional images')
+	
 	
 	args = parser.parse_args()
 	print(args)
@@ -39,7 +42,7 @@ def main():
 	# Bounds checking:
 	boundsCheck(args.scale, "scale", 1)
 	boundsCheck(args.split, "split", 1)
-	boundsCheck(args.density, "density", 0, 1)
+	#boundsCheck(args.density, "density", 0, 1)
 	boundsCheck(args.noise, "noise", 0, 1)
 	if args.type.strip().upper() not in LEGAL_TYPES:
 		print("Unrecognized type parameter: {}. Pick one of: {}".format(args.type.strip().upper(), ", ".join(LEGAL_TYPES)))
@@ -61,12 +64,8 @@ def main():
 		print("There's nothing to render!")
 		exit()
 
-
-	# scale=1, split=2,
-	# density=1, noise=0.2
 	# type='TXT'
-	# file=None, output=''
-
+	# output=''
 	
 	lineWidth = 200
 	if args.width > 0:
@@ -83,17 +82,17 @@ def main():
 	fwGen.setBreakOnWord(True)
 	fw = fwGen.get()  # Convert to BlockImage
 	
-
+	# Expand each cell in the image to a scaleFactor * scaleFactor square of cells.
 	scatR = MapScaleRenderer(scaleFactor)
 	scatR.setDistrib(lambda val, count, line, col, row: count if val else 0)
 	fw = scatR.render(fw)
 
-	# Generate 20% noise in the white areas:
-	noiseR = NoiseRenderer(lambda v: 0 if v else 0.2)
+	# Generate an image that contains 20% noise in the white areas:
+	noiseR = NoiseRenderer(lambda v: 0 if v else args.noise)
 	fwNoise = noiseR.render(fw)
 
 	# Split such that each output image gets exactly 1/2 of the total.
-	sR = SplitRenderer(2)
+	sR = SplitRenderer(args.split)
 	if args.first_line:
 		sR.setDistrib(lambda val, count, line, col, row: (count if line == 0 else 1) if val else 0)
 
@@ -106,7 +105,16 @@ def main():
 	#fw = scatR.render(fw)
 	#print(r.wrapTables(r.render(lW) for lW in ([fw] + sR.render(fw))))
 
-	renders = [fwNoise, fw] + [compositeR.render(partW, fwNoise, lambda a, b: a or b) for partW in [fw] + sR.render(fw)]
+	toComposite = sR.render(fw)
+	if args.verbose:
+		toComposite.append(fw)
+
+	renders = [compositeR.render(partW, fwNoise, lambda a, b: a or b) for partW in toComposite]
+	del toComposite
+
+	if args.verbose:
+		renders.extend([fwNoise, fw])
+
 	i = 0
 	img = ImageRenderer(lineWidth * scaleFactor * 5, 0)
 	for r in renders:
